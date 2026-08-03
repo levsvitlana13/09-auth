@@ -1,0 +1,48 @@
+.mainContent {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.profileCard {
+  width: 100%;
+  max-width: 500px;
+}
+
+.formTitle {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.avatar {
+  display: block;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.usernameWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input {
+  padding: 8px 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+}
+
+.saveButton,
+.cancelButton {
+  padding: 10px 20px;
+  cursor: pointer;
+}

@@ -1,0 +1,42 @@
+.mainContent {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.profileCard {
+  width: 100%;
+  max-width: 500px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.formTitle {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.editProfileButton {
+  text-decoration: none;
+}
+
+.avatarWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.avatar {
+  border-radius: 50%;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

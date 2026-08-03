@@ -1,10 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+
+import { checkSession } from '@/lib/api/serverApi';
 
 export async function proxy(request: NextRequest) {
-  const accessToken = request.cookies.get('accessToken')?.value;
-  const refreshToken = request.cookies.get('refreshToken')?.value;
+  const cookieStore = await cookies();
 
-  const isAuthenticated = !!(accessToken || refreshToken);
+  let accessToken = cookieStore.get('accessToken')?.value;
+  const refreshToken = cookieStore.get('refreshToken')?.value;
+
+  if (!accessToken && refreshToken) {
+    try {
+      const response = await checkSession();
+
+      const setCookie = response.headers['set-cookie'];
+
+      if (setCookie) {
+        const cookiesArray = Array.isArray(setCookie)
+          ? setCookie
+          : [setCookie];
+
+        for (const cookie of cookiesArray) {
+          const [nameValue] = cookie.split(';');
+          const [name, value] = nameValue.split('=');
+
+          cookieStore.set(name, value);
+        }
+
+        accessToken = cookieStore.get('accessToken')?.value;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const isAuthenticated = Boolean(accessToken);
 
   const isPrivateRoute =
     request.nextUrl.pathname.startsWith('/notes') ||
@@ -26,5 +56,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/notes/:path*', '/profile/:path*', '/sign-in', '/sign-up'],
+  matcher: [
+    '/notes/:path*',
+    '/profile/:path*',
+    '/sign-in',
+    '/sign-up',
+  ],
 };
