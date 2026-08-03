@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { AxiosError } from 'axios';
 
 import { register } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -24,49 +25,44 @@ export default function SignUpForm() {
     register: registerField,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpFormValues>();
+  } = useForm<SignUpFormValues>({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-  // const onSubmit = async (data: SignUpFormValues) => {
-  //   try {
-  //     setError('');
+  const onSubmit = async (data: SignUpFormValues) => {
+    try {
+      setError('');
 
-  //     const user = await register(data);
+      console.log('========== SIGN UP ==========');
+      console.log('Form data:', data);
 
-  //     setUser(user);
+      const user = await register(data);
 
-  //     router.push('/profile');
-  //   } catch {
-  //     setError('Registration failed');
-  //   }
-  // };
+      console.log('Registration successful');
+      console.log(user);
 
-const onSubmit = async (data: SignUpFormValues) => {
-  console.log('=== SUBMIT START ===');
-  console.log(data);
+      setUser(user);
 
-  try {
-    setError('');
+      router.push('/profile');
+    } catch (err) {
+      console.error('========== SIGN UP ERROR ==========');
 
-    console.log('Calling register...');
+      if (err instanceof AxiosError) {
+        console.error('Status:', err.response?.status);
+        console.error('Response:', err.response?.data);
+      } else {
+        console.error(err);
+      }
 
-    const user = await register(data);
-
-    console.log('Register success:', user);
-
-    setUser(user);
-
-    router.push('/profile');
-  } catch (error) {
-    console.error('Register error:', error);
-    setError('Registration failed');
-  }
-};
+      setError('Registration failed. Please try again.');
+    }
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className={css.form}
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className={css.form}>
       <div className={css.formGroup}>
         <label htmlFor="email">Email</label>
 
@@ -95,7 +91,7 @@ const onSubmit = async (data: SignUpFormValues) => {
             required: 'Password is required',
             minLength: {
               value: 8,
-              message: 'Minimum 8 characters',
+              message: 'Password must contain at least 8 characters',
             },
           })}
         />
@@ -111,7 +107,7 @@ const onSubmit = async (data: SignUpFormValues) => {
           disabled={isSubmitting}
           className={css.submitButton}
         >
-          Register
+          {isSubmitting ? 'Registering...' : 'Register'}
         </button>
       </div>
 

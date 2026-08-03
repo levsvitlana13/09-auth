@@ -59,3 +59,4 @@ export const fetchNoteById = async (
 
   return data;
 };
+
