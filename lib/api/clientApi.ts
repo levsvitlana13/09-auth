@@ -1,14 +1,7 @@
-import axios from 'axios';
-
 import type { Note } from '@/types/note';
 import type { User } from '@/types/user';
 
 import { api } from './api';
-
-const clientApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true,
-});
 
 export interface FetchNotesParams {
   page: number;
@@ -45,7 +38,7 @@ export const fetchNotes = async ({
   search,
   tag,
 }: FetchNotesParams): Promise<FetchNotesResponse> => {
-  const response = await api.get<FetchNotesResponse>('/notes', {
+  const response = await api.get<FetchNotesResponse>('notes', {
     params: {
       page,
       perPage: 12,
@@ -60,7 +53,7 @@ export const fetchNotes = async ({
 export const fetchNoteById = async (
   id: string,
 ): Promise<Note> => {
-  const response = await api.get<Note>(`/notes/${id}`);
+  const response = await api.get<Note>(`notes/${id}`);
 
   return response.data;
 };
@@ -68,7 +61,7 @@ export const fetchNoteById = async (
 export const createNote = async (
   note: NewNote,
 ): Promise<Note> => {
-  const response = await api.post<Note>('/notes', note);
+  const response = await api.post<Note>('notes', note);
 
   return response.data;
 };
@@ -76,7 +69,7 @@ export const createNote = async (
 export const deleteNote = async (
   id: string,
 ): Promise<Note> => {
-  const response = await api.delete<Note>(`/notes/${id}`);
+  const response = await api.delete<Note>(`notes/${id}`);
 
   return response.data;
 };
@@ -84,8 +77,8 @@ export const deleteNote = async (
 export const register = async (
   credentials: AuthCredentials,
 ): Promise<User> => {
-  const response = await clientApi.post<User>(
-    '/api/auth/register',
+  const response = await api.post<User>(
+    'auth/register',
     credentials,
   );
 
@@ -95,8 +88,8 @@ export const register = async (
 export const login = async (
   credentials: AuthCredentials,
 ): Promise<User> => {
-  const response = await clientApi.post<User>(
-    '/api/auth/login',
+  const response = await api.post<User>(
+    'auth/login',
     credentials,
   );
 
@@ -104,20 +97,20 @@ export const login = async (
 };
 
 export const logout = async (): Promise<void> => {
-  await clientApi.post('/api/auth/logout');
+  await api.post('auth/logout');
 };
 
 export const checkSession = async (): Promise<boolean> => {
-  const response = await clientApi.get<SessionResponse>(
-    '/api/auth/session',
+  const response = await api.get<SessionResponse>(
+    'auth/session',
   );
 
   return response.data.success;
 };
 
 export const getMe = async (): Promise<User> => {
-  const response = await clientApi.get<User>(
-    '/api/users/me',
+  const response = await api.get<User>(
+    'users/me',
   );
 
   return response.data;
@@ -126,8 +119,8 @@ export const getMe = async (): Promise<User> => {
 export const updateMe = async (
   userData: UpdateUserData,
 ): Promise<User> => {
-  const response = await clientApi.patch<User>(
-    '/api/users/me',
+  const response = await api.patch<User>(
+    'users/me',
     userData,
   );
 

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 
 import type { Note } from '@/types/note';
+import type { User } from '@/types/user';
 
 import { api } from './api';
 
@@ -22,6 +23,34 @@ const getCookieHeader = async (): Promise<string> => {
     .getAll()
     .map(({ name, value }) => `${name}=${value}`)
     .join('; ');
+};
+
+interface SessionResponse {
+  success: boolean;
+}
+
+export const checkSession = async (): Promise<SessionResponse> => {
+  const cookieHeader = await getCookieHeader();
+
+  const { data } = await api.get<SessionResponse>('auth/session', {
+    headers: {
+      Cookie: cookieHeader,
+    },
+  });
+
+  return data;
+};
+
+export const getCurrentUser = async (): Promise<User> => {
+  const cookieHeader = await getCookieHeader();
+
+  const { data } = await api.get<User>('users/me', {
+    headers: {
+      Cookie: cookieHeader,
+    },
+  });
+
+  return data;
 };
 
 export const fetchNotes = async ({

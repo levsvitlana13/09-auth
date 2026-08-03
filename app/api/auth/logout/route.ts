@@ -1,60 +1,35 @@
 import { NextResponse } from 'next/server';
 import { api } from '../../api';
 import { cookies } from 'next/headers';
-import { parseSetCookie } from 'cookie';
 import { isAxiosError } from 'axios';
 import { logErrorResponse } from '../../_utils/utils';
 
 export async function POST() {
   try {
-    const apiRes = await api.post('/auth/logout');
-
     const cookieStore = await cookies();
-    const setCookie = apiRes.headers['set-cookie'];
 
-    if (setCookie) {
-      const cookieArray = Array.isArray(setCookie)
-        ? setCookie
-        : [setCookie];
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
-      for (const cookieStr of cookieArray) {
-        const parsed = parseSetCookie(cookieStr);
-
-        if (parsed.value) {
-          cookieStore.set(parsed.name, parsed.value, parsed);
-        }
-      }
-    }
-
-    return NextResponse.json(apiRes.data, {
-      status: apiRes.status,
+    await api.post('auth/logout', null, {
+      headers: {
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
+      },
     });
+
+    cookieStore.delete('accessToken');
+    cookieStore.delete('refreshToken');
+
+    return NextResponse.json({ message: 'Logged out successfully' }, { status: 200 });
   } catch (error) {
     if (isAxiosError(error)) {
       logErrorResponse(error.response?.data);
-
       return NextResponse.json(
-        {
-          error: error.message,
-          response: error.response?.data,
-        },
-        {
-          status: error.status,
-        },
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
       );
     }
-
-    logErrorResponse({
-      message: (error as Error).message,
-    });
-
-    return NextResponse.json(
-      {
-        error: 'Internal Server Error',
-      },
-      {
-        status: 500,
-      },
-    );
+    logErrorResponse({ message: (error as Error).message });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
