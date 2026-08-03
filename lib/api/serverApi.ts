@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import type { AxiosResponse } from 'axios';
 
 import type { Note } from '@/types/note';
 import type { User } from '@/types/user';
@@ -16,6 +17,10 @@ export interface FetchNotesResponse {
   totalPages: number;
 }
 
+interface SessionResponse {
+  success: boolean;
+}
+
 const getCookieHeader = async (): Promise<string> => {
   const cookieStore = await cookies();
 
@@ -25,20 +30,18 @@ const getCookieHeader = async (): Promise<string> => {
     .join('; ');
 };
 
-interface SessionResponse {
-  success: boolean;
-}
-
-export const checkSession = async (): Promise<SessionResponse> => {
+export const checkSession = async (): Promise<
+  AxiosResponse<SessionResponse>
+> => {
   const cookieHeader = await getCookieHeader();
 
-  const { data } = await api.get<SessionResponse>('auth/session', {
+  const response = await api.get<SessionResponse>('auth/session', {
     headers: {
       Cookie: cookieHeader,
     },
   });
 
-  return data;
+  return response;
 };
 
 export const getCurrentUser = async (): Promise<User> => {
@@ -60,7 +63,7 @@ export const fetchNotes = async ({
 }: FetchNotesParams): Promise<FetchNotesResponse> => {
   const cookieHeader = await getCookieHeader();
 
-  const { data } = await api.get<FetchNotesResponse>('/notes', {
+  const { data } = await api.get<FetchNotesResponse>('notes', {
     params: {
       page,
       perPage: 12,
@@ -76,11 +79,11 @@ export const fetchNotes = async ({
 };
 
 export const fetchNoteById = async (
-  id: string
+  id: string,
 ): Promise<Note> => {
   const cookieHeader = await getCookieHeader();
 
-  const { data } = await api.get<Note>(`/notes/${id}`, {
+  const { data } = await api.get<Note>(`notes/${id}`, {
     headers: {
       Cookie: cookieHeader,
     },
@@ -88,4 +91,3 @@ export const fetchNoteById = async (
 
   return data;
 };
-
